@@ -1,28 +1,48 @@
 import numpy as np
-def  zuo(a,b):
-    return (1+(a+b+1)**2*(19-14*a+3*b**2-14*b+6*a*b+3*b**2))*(30+(2*a-3*b)**2*(18-32*a+12*a**2+48*b-36*a*b+27*b**2))
-def  you(c,d):
-    return(1+(c+d+1)**2*(19-14*c+3*d**2-14*d+6*c*d+3*d**2))*(30+(2*c-3*d)**2*(18-32*c+12*c**2+48*d-36*c*d+27*d**2))
-x=np.random.randn(2)
-step=2
-for i in range (500):
-    dir = np.random.randn(2)
+from matplotlib import pyplot as plt
+
+def f(x):
+    res = 0
+    for i in range(0, 19):
+        if res > 9:
+            res = res - i*x[i]*x[i];
+        else:
+            res = res + i*x[i]*x[i];
+    return res
+
+itor = 200
+dim = 20
+xlist = np.zeros((itor, dim))
+x = np.random.randn(dim)
+step = 100
+for i in range(itor):
+    dir = np.random.randn(dim)
+    cnt = 0
     dir = dir / np.linalg.norm(dir, ord=1, axis=0)
-    step =0.95*step
-    d0=step/2
-    xl=x+d0*dir/2
-    xr=x-d0*dir/2
-    a=xl[0]
-    b=xl[1]
-    c=xr[0]
-    d=xr[1]
-    fleft=zuo(a,b)
-    fright=you(c,d)
-    x=x-step*dir*np.sign(fleft-fright)
-    if abs(x[0])>2 or abs(x[1])>2:
+    step = 0.95 * step
+    d0 = step / 2
+    #print(step)
+    xl = x + d0 * dir / 2
+    xr = x - d0 * dir / 2
+    fleft = f(xl)
+    fright = f(xr)
+    tx = x - step * dir * np.sign(fleft - fright)
+    xlist[i, :] = tx
+    if abs(tx[0]) > 100 or abs(tx[1]) > 100:
         continue
-if fleft<fright:
+    else:
+        x = tx
+    #print(xl)
+    #print(min(fleft, fright))
+    #print(x)
+    #print(f(x))
+
+if fleft < fright:
     print(fleft)
 else:
     print(fright)
 print(x)
+print(f(x))
+# plt.figure(0)
+# plt.plot(xlist[:,0], xlist[:,1])
+# plt.show()
