@@ -50,10 +50,10 @@ const long long llINF = 9223372036854775807;
 const int INF = 2147483647;
 const int MAXN = 100 + 1;//维数
 const int K = 100;//最大环境承载力
-const int N = 100;//总迭代次数
+const int N = 200;//总迭代次数
 const int P = 100;//初始种群数
 const db C = 2.0;//两须距离与步长比
-const db STEP = 10;//初始步长
+const db STEP = 100;//初始步长
 const db alpha = 0.95;//步长因子
 const db beta = 1.05;//繁殖因子
 struct Beetle{
@@ -76,9 +76,8 @@ int rdm(int a, int b){
 }
 db F(db x[]){
     db res = 0.0;
-    for(int i = 2; i <= n-1; i++){
-        if(i & 1) res += i*x[i]*x[i-1];
-        else res -= i*x[i]*x[i+1];
+    for(int i = 1; i <= n; i++){
+        res += i*x[i] * x[i];
         //cerr << x[i] << " ";
     }
     //cerr << endl;
@@ -145,7 +144,7 @@ void BAS(){
                 //cerr << b[i1] << " ";
                 sl[i1] = deque[p].stat[i1] + d * b[i1] / 2.0;
                 sr[i1] = deque[p].stat[i1] - d * b[i1] / 2.0;
-                if(abs(sr[i1]) > 10.0 || abs(sl[i1]) > 10.0){//修改函数定义域
+                if(abs(sr[i1]) > 100.0 || abs(sl[i1]) > 100.0){//修改函数定义域
                     BeyondDim = true;
                     break;
                 }
@@ -158,7 +157,7 @@ void BAS(){
             //cerr << fleft << " " << fright << endl;
             for(int i1 = 1; i1 <= n; i1++){
                 temp[i1] = deque[p].stat[i1] - step * b[i1] * sign(fleft - fright);
-                if(abs(temp[i1]) > 10.0){//修改函数定义域
+                if(abs(temp[i1]) > 100.0){//修改函数定义域
                     BeyondDim = true;
                     break;
                 }
