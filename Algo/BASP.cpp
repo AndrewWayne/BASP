@@ -116,6 +116,19 @@ void BAS(){
             //*
             if(deque[p].step <= EPS){
                 deque[p].age++;//走不动了，饿死了
+                if(rate > 0.000001){
+                    if(rdm(1, 1000) <= round(rate * 1000)){
+                        int p1 = ++bck; p1 %= K+10;
+                        deque[p1].delta = alpha;
+                        deque[p1].step = STEP;
+                        deque[p1].age = 0;
+                        memcpy(deque[p1].stat, deque[p].stat, sizeof(sol));
+                    }
+                }else{
+                    if(rdm(1, 1000) <= round(-rate * 1000))
+                        frnt++;
+                }
+                frnt++;
                 continue;
             }
             //*/
@@ -189,9 +202,6 @@ void BAS(){
                     deque[p1].step = STEP;
                     deque[p1].age = 0;
                     memcpy(deque[p1].stat, deque[p].stat, sizeof(sol));
-                }else{
-                    if(rdm(1, 1000) <= round(-rate * 1000))
-                        frnt++;//自然死亡，控制种群数，防止超过环境承载度
                 }
             }else{
                 if(rdm(1, 1000) <= round(-rate * 1000))
