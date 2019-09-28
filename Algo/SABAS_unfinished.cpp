@@ -3,6 +3,7 @@
  * Date: 9.19
  * Motto: Face to the weakness, expect for the strength.
 */
+#pragma GCC optimize(3, "Ofast", "inline")
 #include<cstdio>
 #include<cstring>
 #include<algorithm>
@@ -48,25 +49,27 @@ namespace IO{
 using namespace IO;
 const long long llINF = 9223372036854775807;
 const int INF = 2147483647;
-const int MAXN = 100 + 1;//维数
-const int K = 100;//最大环境承载力
-const int N = 200;//总迭代次数
-const int P = 10;//初始种群数
+const int MAXN = 2 + 1;//维数
+const int K = 10;//最大环境承载力
+const int N = 88;//总迭代次数
+const int P = 1;//初始种群数
 const db C = 2.0;//两须距离与步长比
-const db STEP = 100;//初始步长
-const db EPS = 1e-6;
-const db alpha = 0.95;//步长因子
+const db EPS = 1e-9;
+const int maxn = 2e3 + 10;
+const db alpha = 0.88;//步长因子
 const db beta = 1.05;//繁殖因子
+db STEP = 14140;
 struct Beetle{
     db stat[MAXN];
     db delta, step;
     int age;
 };
 Beetle deque[K+10];
-int frnt, bck, n;
+int frnt, bck, n, nn, m;
 int AOI;
 db sol[MAXN], fminv, sl[MAXN], sr[MAXN], birthnum;
-db fleft, fright;
+db fleft, fright, Tempr;
+db X[maxn], Y[maxn], len[maxn];
 db temp[MAXN];
 int sign(db x){
     if(x < 0.0) return -1;
@@ -76,13 +79,15 @@ int rdm(int a, int b){
     return rand() % (b-a+1) + a;
 }
 db F(db x[]){
-    db res = 0.0;
-    for(int i = 1; i <= n; i++){
-        res += i*x[i]*x[i];
-        //cerr << x[i] << " ";
+    //cerr << "$$$" << endl;
+    for(int i = 1; i <= nn; i++){
+        len[i] = (X[i] - x[1]) * (X[i] - x[1]) + (Y[i] - x[2]) * (Y[i] - x[2]);
+        //cerr << len[i] << " ";
     }
+    sort(len+1, len+1+nn);
     //cerr << endl;
-    return res;
+    //cerr << sqrt(len[m]) << endl;
+    return sqrt(len[m]);
 }
 void RAND(db A[]){
     db len = 0;
@@ -101,51 +106,27 @@ void BAS(){
         deque[++bck].delta = alpha, deque[bck].step = STEP;
         deque[bck].age = 1;
         for(int j = 1; j <= n; j++){
-            deque[bck].stat[j] = (db)rdm(-100, 100)/200;
+            deque[bck].stat[j] = (db)rdm(-100, 100)/200 + sol[j];
                 //cerr << deque[bck].stat[j] << " ";
         }
             //cerr << endl;
     }
     //cerr << "I'm in!" << endl;
     for(int i = 1; i <= N; i++){
-        int cnt = bck - frnt + 1;
-        db rate = birthnum / cnt;
         for(int j = frnt; j <= bck; j++){
             int p = j % (K+10);
-            //cerr << "$" << endl;
-            //*
-            if(deque[p].step <= EPS){
-                deque[p].age++;//走不动了，饿死了
-                continue;
-            }
-            //*/
-            AOI++;
-            cnt = bck - frnt + 1;
-            if(cnt <= K / 2){
-                birthnum = abs(birthnum) * beta;
-            }else if(cnt > K/2 && cnt <= K){
-                birthnum = abs(birthnum) / beta;
-            }else{
-                birthnum = abs(birthnum) * (-beta);
-            }
-            rate = birthnum / cnt;
+            if(deque[p].step <= EPS) continue;
             db b[MAXN];
             RAND(b);
-            deque[p].step = alpha * deque[p].step;
+            deque[p].step = deque[p].delta * deque[p].step;
             db step = deque[p].step;
-            //cerr << step << endl;
             db d = step/C;
-            //cerr << d << endl;
             bool BeyondDim = false;
             RAND(b);
-            //cerr << b[1] << endl;
-            //cerr << "$$$" << endl;
             for(int i1 = 1; i1 <= n; i1++){
-            //    cerr << sl[i1] << " " ;
-                //cerr << b[i1] << " ";
                 sl[i1] = deque[p].stat[i1] + d * b[i1] / 2.0;
                 sr[i1] = deque[p].stat[i1] - d * b[i1] / 2.0;
-                if(abs(sr[i1]) > 100.0 || abs(sl[i1]) > 100.0){//修改函数定义域
+                if(abs(sr[i1]) > 10000.0 || abs(sl[i1]) > 10000.0){//修改函数定义域
                     BeyondDim = true;
                     break;
                 }
@@ -158,7 +139,7 @@ void BAS(){
             //cerr << fleft << " " << fright << endl;
             for(int i1 = 1; i1 <= n; i1++){
                 temp[i1] = deque[p].stat[i1] - step * b[i1] * sign(fleft - fright);
-                if(abs(temp[i1]) > 100.0){//修改函数定义域
+                if(abs(temp[i1]) > 10000.0){//修改函数定义域
                     BeyondDim = true;
                     break;
                 }
@@ -181,50 +162,38 @@ void BAS(){
             }
             //for(int )
             deque[p].age++;
-            //*
-            if(rate > 0.000001){
-                if(rdm(1, 1000) <= round(rate * 1000)){
-                    int p1 = ++bck; p1 %= K+10;
-                    deque[p1].delta = alpha;
-                    deque[p1].step = STEP;
-                    deque[p1].age = 0;
-                    memcpy(deque[p1].stat, deque[p].stat, sizeof(sol));
-                }else{
-                    if(rdm(1, 1000) <= round(-rate * 1000))
-                        frnt++;//自然死亡，控制种群数，防止超过环境承载度
-                }
-            }else{
-                if(rdm(1, 1000) <= round(-rate * 1000))
-                    frnt++;
-            }
-            // */
         }
     }
 }
+double Time(){return (double)clock()/CLOCKS_PER_SEC;}
 int main(){
-    srand(time(0));
-    n = read();
-    db AOS = 0;
-    db kminv = 2147483647.0;
-    db kmaxv = 0.0;
-    fminv = 2147483647.0;
-    for(int i = 1; i <= 50; i++){
-        fminv = 2147483647.0;
-        BAS();
-        AOS += fminv;
-        //cout << "$$: " << fminv << endl;
-        kminv = min(kminv, fminv);
-        kmaxv = max(kmaxv, fminv);
+    //freopen("fagttering17.in", "r", stdin);
+    srand(123456);
+    n = 2;
+    scanf("%d%d", &nn, &m);
+    for(int i = 1; i <= nn; i++){
+        scanf("%lf%lf", &X[i], &Y[i]);
+        //cerr << X[i] << "  " << Y[i] << endl;
     }
-    AOI /= 50;
-    AOS /= 50;
-    //cerr << n << endl;
-    //for(int ww = 1; ww <= 99; ww++)
-    //    BAS();
-    cout << "ASOI: " << AOI << endl;
-    cout << "AOS: " << AOS << endl;
-    cout << "MOS: " << kminv << endl;
-    cout << kmaxv << endl;
+    fminv = 2147483647;
+    int L = 1;
+    Tempr = 200;
+    for(L = 1; L <= 100; L++){
+        
+    }
+    if(nn <= 50){
+        while(Time() < 0.9){
+            BAS();
+            STEP *= 0.92;
+        }
+        printf("%f", fminv);
+        return 0;
+    }
+    while(Time() < 2.9){
+        BAS();
+        STEP *= 0.94;
+    }
+    printf("%.8f", fminv);
     //for(int i = 1; i <= n; i++)
     //    cout << sol[i] << " ";
     return 0;

@@ -49,7 +49,7 @@ using namespace IO;
 const long long llINF = 9223372036854775807;
 const int INF = 2147483647;
 const int MAXN = 100 + 1;//维数
-const int K = 100;//最大环境承载力
+const int K = 10;//最大环境承载力
 const int N = 200;//总迭代次数
 const int P = 10;//初始种群数
 const db C = 2.0;//两须距离与步长比
